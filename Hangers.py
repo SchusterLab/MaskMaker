@@ -1,6 +1,5 @@
-import sdxf
-from MaskMaker import *
-from ResonatorCalculations import *
+from lib.MaskMaker.MaskMaker import *
+from lib.MaskMaker.ResonatorCalculations import *
 
 
 #HangerCoupler

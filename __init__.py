@@ -1,6 +1,6 @@
-import sdxf
-from MaskMaker import *
-from ResonatorCalculations import *
-from inductors import *
-from Hangers import *
-from Utilities import *
+from lib.MaskMaker import sdxf
+from lib.MaskMaker.MaskMaker import *
+from lib.MaskMaker.ResonatorCalculations import *
+from lib.MaskMaker.inductors import *
+from lib.MaskMaker.Hangers import *
+from lib.MaskMaker.Utilities import *

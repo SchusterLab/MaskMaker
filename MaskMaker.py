@@ -1,8 +1,10 @@
-import sdxf
-from math import sin, cos, tan, pi, floor, asin, acos, atan, degrees, radians
-from alphanum import alphanum_dict
+from math import sin, cos, pi, floor, acos, atan, degrees, radians
 import random
-from numpy import sqrt, array
+
+from numpy import sqrt
+
+from lib.MaskMaker import sdxf as sdxf
+from alphanum import alphanum_dict
 
 
 class MaskError:

@@ -4,11 +4,15 @@ Created on Mon Aug 06 11:30:46 2012
 
 @author: phil
 """
-from slab.circuits import orient_pts, calculate_gap_width, calculate_interior_length
 from math import pi
-from dsobj import *
-import numpy as np
 import logging
+
+from slab.circuits import calculate_gap_width, calculate_interior_length
+import numpy as np
+
+from lib.MaskMaker.MaskMaker.dsobj import *
+
+
 logging.basicConfig(filename="dstest.log")
 
 class DesignerScript(object):

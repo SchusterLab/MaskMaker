@@ -1,9 +1,12 @@
-from scipy import sqrt,pi,tanh,sinh
-from scipy.special import ellipk
-from scipy.optimize import newton, brentq
-from scipy.interpolate import interp1d
-from MaskMaker import ChannelFingerCap,CapDesc,CPWLCoupler,CPWGapCap,CPWFingerCap,CPWInductiveShunt,MaskError
 from math import floor, ceil
+
+from scipy import sqrt,pi, sinh
+from scipy.special import ellipk
+from scipy.optimize import brentq
+from scipy.interpolate import interp1d
+
+from lib.MaskMaker.MaskMaker import CPWGapCap,CPWFingerCap,CPWInductiveShunt,MaskError
+
 
 mu0=1.25663706e-6
 eps0=8.85418782e-12
