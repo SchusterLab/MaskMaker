@@ -286,8 +286,7 @@ class WaferMask(sdxf.Drawing):
             translate_pt(pt, (self.die_size[0], self.die_size[1]))) and self.point_inside(
             translate_pt(pt, (0, self.die_size[1])))
 
-    @property
-    def chip_points(self):
+    def get_chip_points(self):
         """Get insertion points for all of the chips (layout wafer)"""
         max_cols = int((self.diameter - 2 * self.buffer) / self.die_size[0])
         max_rows = int((self.diameter - 2 * self.buffer) / self.die_size[1])
