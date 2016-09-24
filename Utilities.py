@@ -98,8 +98,8 @@ class Test(unittest.TestCase):
         self.assertRaises(AttributeError,getattr,a,'bar')
 """
 
-from MaskMaker import *
-from ResonatorCalculations import *
+from lib.MaskMaker import *
+from .ResonatorCalculations import *
 class ChipDefaults(dict):
     """ changed defaults to a class, and added all the values as attributes."""
     @autoargs()

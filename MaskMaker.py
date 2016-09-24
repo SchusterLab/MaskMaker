@@ -5,7 +5,7 @@ import random
 from numpy import sqrt
 
 from lib.MaskMaker import sdxf as sdxf
-from alphanum import alphanum_dict
+from .alphanum import alphanum_dict
 
 
 class MaskError:
@@ -222,10 +222,11 @@ class WaferMask(sdxf.Drawing):
         slots_remaining = self.chip_points.__len__() - self.current_point
         for ii in range(copies):
             if self.current_point >= self.chip_points.__len__():
-                raise MaskError, "MaskError: Cannot add %d copies of chip '%s' Only %d slots on mask and %d remaining." % (
-                    copies, chip.name, self.chip_points.__len__(), slots_remaining)
+                raise MaskError(
+                    "MaskError: Cannot add %d copies of chip '%s' Only %d slots on mask and %d remaining." % (
+                        copies, chip.name, self.chip_points.__len__(), slots_remaining))
             p = self.chip_points[self.current_point]
-            print p,
+            print(p, end=' ')
             self.current_point += 1
             self.append(sdxf.Insert(chip.name, point=p))
             if chip.two_layer:
@@ -276,7 +277,7 @@ class WaferMask(sdxf.Drawing):
         else:
             return (pt[0] ** 2 + pt[1] ** 2 < (self.diameter / 2. - self.buffer) ** 2) and (
                 pt[1] < self.flat_distance - self.buffer)
-            print -self.flat_distance + self.buffer, "*******"
+            # print(- self.flat_distance + self.buffer, "*******")
 
     def die_inside(self, pt):
         """Tell if chip of size self.chip_size is completely on the wafer"""
@@ -285,11 +286,12 @@ class WaferMask(sdxf.Drawing):
             translate_pt(pt, (self.die_size[0], self.die_size[1]))) and self.point_inside(
             translate_pt(pt, (0, self.die_size[1])))
 
-    def get_chip_points(self):
+    @property
+    def chip_points(self):
         """Get insertion points for all of the chips (layout wafer)"""
         max_cols = int((self.diameter - 2 * self.buffer) / self.die_size[0])
         max_rows = int((self.diameter - 2 * self.buffer) / self.die_size[1])
-        print "Maximum number of rows=%d and cols=%d" % (max_rows, max_cols)
+        print("Maximum number of rows={:d} and cols={:d}".format(max_rows, max_cols))
         # figure out offset for chips (centered on chip or between chips)
         xoffset = -max_cols / 2. * self.die_size[0]
         yoffset = -max_rows / 2. * self.die_size[1]
@@ -305,7 +307,7 @@ class WaferMask(sdxf.Drawing):
                 pt = (xoffset + jj * self.die_size[0], yoffset + ii * self.die_size[1])
                 if self.die_inside(pt):
                     chip_points.append(translate_pt(pt, (self.dicing_border / 2., self.dicing_border / 2.)))
-        print "Room for %d chips on wafer." % chip_points.__len__()
+        print("Room for %d chips on wafer." % chip_points.__len__())
         return chip_points
 
 
@@ -410,9 +412,9 @@ class Chip(sdxf.Block):
             d.append(sdxf.Insert(self.gap_layer.name, point=(0, 0), layer='gap'))
             d.blocks.append(self.pin_layer)
             d.append(sdxf.Insert(self.pin_layer.name, point=(0, 0), layer='pin'))
-            print d.layers
-            print self.gap_layer.layer
-            print self.pin_layer.layer
+            print(d.layers)
+            print(self.gap_layer.layer)
+            print(self.pin_layer.layer)
         else:
             if do_label:
                 self.label_chip(self, maskid, chipid, self.author)
@@ -630,7 +632,7 @@ class CoupledStraight:
     def __init__(self, structure, length, pinw=None, gapw=None, center_gapw=None):
         if length == 0: return
         if length < 0:
-            print "Warning -- Negative length straight section"
+            print("Warning -- Negative length straight section")
 
         s = structure
         if pinw is None: pinw = structure.__dict__['pinw']
@@ -639,7 +641,7 @@ class CoupledStraight:
             try:
                 center_gapw = structure.center_gapw
             except KeyError:
-                print "Missing center_gapw argument!"
+                print("Missing center_gapw argument!")
                 # center_gapw = 1
         pinw, gapw, center_gapw = float(pinw), float(gapw), float(center_gapw)
 
@@ -705,7 +707,7 @@ class CPWStraight:
         """ Adds a straight section of CPW transmission line of length = length to the structure"""
         if length == 0: return
         if length < 0:
-            print "Warning -- Negative length straight section"
+            print("Warning -- Negative length straight section")
 
         s = structure
         if pinw is None: pinw = structure.__dict__['pinw']
@@ -951,7 +953,7 @@ class ThreePinTaper:
                  stop_gapw=None, stop_center_pinw=None, stop_center_gapw=None):
         if length == 0: return
         if length < 0:
-            print "Warning -- Negative length straight section"
+            print("Warning -- Negative length straight section")
 
         s = structure
         if pinw is None: pinw = structure.__dict__['pinw']
@@ -1041,7 +1043,7 @@ class CoupledTaper:
                  stop_center_gapw=None):
         if length == 0: return
         if length < 0:
-            print "Warning -- Negative length straight section"
+            print("Warning -- Negative length straight section")
 
         s = structure
         if pinw is None: pinw = structure.__dict__['pinw']
@@ -1049,9 +1051,9 @@ class CoupledTaper:
         if center_gapw is None:
             try:
                 center_gapw = structure.center_gapw
-            except AttributeError:
-                print "Missing center_gapw argument!"
-                center_gapw = pinw
+            except KeyError:
+                print("Missing center_gapw argument!")
+                #center_gapw = 1
         pinw, gapw, center_gapw = float(pinw), float(gapw), float(center_gapw)
 
         if stop_pinw == None: stop_pinw = pinw
@@ -1299,7 +1301,7 @@ class CPWBend:
 
     def arc_bend(self):
 
-        # print "start: %d, stop: %d" % (start_angle,stop_angle)
+        # print("start: %d, stop: %d" % (start_angle, stop_angle))
 
         if self.turn_angle > 0:
             self.astart_angle = self.start_angle - 90
@@ -1406,7 +1408,8 @@ class CPWWiggles:
                                                                         2 * (num_wiggles - 1) * radius)) / (
                           2 * num_wiggles)
             self.height = vlength + radius
-            if vlength < 0: print "Warning: length of vertical segments is less than 0, increase total_length or decrease num_wiggles"
+            if vlength < 0: print(
+                "Warning: length of vertical segments is less than 0, increase total_length or decrease num_wiggles")
 
             if start_up:
                 asign = 1
@@ -1577,7 +1580,8 @@ class CoupledWiggles:
                                                                         2 * (num_wiggles - 1) * radius)) / (
                           2 * num_wiggles)
             self.height = vlength + radius
-            if vlength < 0: print "Warning: length of vertical segments is less than 0, increase total_length or decrease num_wiggles"
+            if vlength < 0: print(
+                "Warning: length of vertical segments is less than 0, increase total_length or decrease num_wiggles")
 
             if start_up:
                 asign = 1
@@ -1642,7 +1646,8 @@ class CPWWigglesByLength:
                        pi * radius * (2 * num_wiggles - 1)) / (2 * num_wiggles)
 
         if vlength < 0:
-            raise MaskError, "Warning: length of vertical segments is less than 0, increase total_length or decrease num_wiggles"
+            raise MaskError(
+                "Warning: length of vertical segments is less than 0, increase total_length or decrease num_wiggles")
 
         self.vlength = vlength
 
@@ -1727,7 +1732,7 @@ class RightJointWiggles:
         CPWRightJoint(s, (not CCW))
         tot_span += cpwidth
 
-        # print "CHECK", tot_span, total_length
+        # print("CHECK", tot_span, total_length)
 
 
 class ChannelWigglesByLength:
@@ -1769,7 +1774,8 @@ class ChannelWigglesByLength:
                        - pi * radius * (2 * num_wiggles - 1)) / (2 * num_wiggles)
 
         if vlength < 0:
-            raise MaskError, "Warning: length of vertical segments is less than 0, increase total_length or decrease num_wiggles"
+            raise MaskError(
+                "Warning: length of vertical segments is less than 0, increase total_length or decrease num_wiggles")
 
         self.vlength = vlength
 
@@ -1834,7 +1840,7 @@ class CPWPaddedWiggles:
             radius = s.__dict__['radius']
 
         if cpw_length < length + (2 * pi - 4) * radius:
-            raise MaskError, "Error in CPWPaddedWiggles: cpw_length=%f needs less than one wiggle!" % (cpw_length)
+            raise MaskError("Error in CPWPaddedWiggles: cpw_length=%f needs less than one wiggle!" % (cpw_length))
 
         # calculate maximum length possible in area
         num_wiggles = int(floor(length / (2 * radius) - 1))
@@ -1842,8 +1848,9 @@ class CPWPaddedWiggles:
         vlength = (width - 4 * radius) / 2.
         max_length = (1 + num_wiggles) * (pi * radius) + 2 * num_wiggles * vlength + 2 * (num_wiggles - 1) * radius
         if cpw_length > max_length:
-            raise MaskError, "Error in CPWPaddedWiggles: cpw_length=%f > max_length=%f that can be fit into alotted area!" % (
-                cpw_length, max_length)
+            raise MaskError(
+                "Error in CPWPaddedWiggles: cpw_length=%f > max_length=%f that can be fit into alotted area!" % (
+                    cpw_length, max_length))
 
             # to be finished
 
@@ -2038,8 +2045,11 @@ class CPWInductiveShunt:
         else:
             self.gapw = segment_length
 
+
+    @property
     def description(self):
-        # print self.type,self.inductance,self.num_segments,self.segment_length,self.segment_width,self.segment_gap,self.pinw,self.gapw
+        # print(self.type, self.inductance, self.num_segments, self.segment_length, self.segment_width, self.segment_gap,
+        #       self.pinw, self.gapw)
         return "type:\t%s\tAssumed Inductance:\t%f pH\t# of segments:\t%d\tSegment length:\t%f\tSegment width:\t%f\tSegment gap:\t%f\tTotal inductor length:\t%f\tPin width:\t%f\tGap width:\t%f\tTaper length:\t%f" % (
             self.type, self.inductance * 1e12, self.num_segments, self.segment_length, self.segment_width,
             self.segment_gap, self.segment_length * self.num_segments + (self.num_segments + 1) * self.segment_gap,
@@ -2143,7 +2153,7 @@ class CPWFingerCap:
         self.capacitance = capacitance  # simulated capacitance
         self.num_fingers = num_fingers  # number of fingers
         if num_fingers < 2:
-            raise MaskError, "CPWFingerCap must have at least 2 fingers!"
+            raise MaskError("CPWFingerCap must have at least 2 fingers!")
         self.finger_length = finger_length  # length of fingers
         self.finger_width = finger_width  # width of each finger
         self.finger_gap = finger_gap
@@ -2228,7 +2238,7 @@ class CPWFingerCap:
             # finger = translate_pts(finger, start)
             finger = orient_pts(finger, s.last_direction, start)
             for ii in range(self.num_fingers):
-                # print "Writing finger", ii
+                # print("Writing finger", ii)
                 if ii % 2 == 0:  # Right side
                     offset = (self.finger_gap,
                               (ii * (self.finger_width + self.finger_gap)) - (center_width / 2.))
@@ -2331,7 +2341,7 @@ class CPWFingerCapInside:
         self.capacitance = capacitance  # simulated capacitance
         self.num_fingers = num_fingers  # number of fingers
         if num_fingers < 2:
-            raise MaskError, "CPWFingerCap must have at least 2 fingers!"
+            raise MaskError("CPWFingerCap must have at least 2 fingers!")
         self.finger_length = finger_length  # length of fingers
         self.finger_width = finger_width  # width of each finger
         self.finger_gap = finger_gap
@@ -2717,8 +2727,7 @@ class CapStar:
         number = self.number
 
         cap_width = cap.num_fingers * cap.finger_width + (cap.num_fingers - 1) * cap.finger_gap + 2 * cap.pinw * \
-                                                                                                  s.__dict__['gapw'] / \
-                                                                                                  s.__dict__['pinw']
+                    s.__dict__['gapw'] / s.__dict__['pinw']
         taper_length = cap.taper_length
         # phi is angle capacitor taper makes
         phi = atan((cap_width - pinw - 2 * gapw) / (2. * taper_length))
@@ -3213,7 +3222,7 @@ class ChannelBendSolid:
 
         # theta is the "infinitesimal angle"
         # alpha is remaining angle of the isoscoles triangle
-        theta_deg = turn_angle / float(self.segments)
+        theta_deg = turn_angle / self.segments
         alpha_deg = (180 - theta_deg) / 2.
         theta = radians(theta_deg)
         alpha = radians(alpha_deg)
@@ -3358,7 +3367,8 @@ class ChannelWiggles:
         vlength = (total_length - (end_bends + num_wiggles) * pi * radius - 2 * (num_wiggles - 1) * radius) / (
             2 * num_wiggles)
 
-        if vlength < 0: print "Warning: length of vertical segments is less than 0, increase total_length or decrease num_wiggles"
+        if vlength < 0: print(
+            "Warning: length of vertical segments is less than 0, increase total_length or decrease num_wiggles")
 
         if start_up:
             asign = 1
@@ -3871,7 +3881,7 @@ class ChannelFingerCap:
         self.capacitance = capacitance  # simulated capacitance
         self.num_fingers = num_fingers  # number of fingers
         if num_fingers < 2:
-            raise MaskError, "ChannelFingerCap must have at least 2 fingers!"
+            raise MaskError("ChannelFingerCap must have at least 2 fingers!")
         self.finger_length = finger_length  # length of fingers
         self.finger_width = finger_width  # width of each finger
         self.finger_gap = finger_gap
@@ -4018,7 +4028,7 @@ class ChannelFingerCapSym:
         self.capacitance = capacitance  # simulated capacitance
         self.num_fingers = num_fingers  # number of fingers
         if num_fingers < 2:
-            raise MaskError, "ChannelFingerCap must have at least 2 fingers!"
+            raise MaskError("ChannelFingerCap must have at least 2 fingers!")
         self.finger_length = finger_length  # length of fingers
         self.finger_width = finger_width  # width of each finger
         self.finger_gap = finger_gap
@@ -4318,7 +4328,7 @@ class AlignmentCross:
             drawing.blocks.append(cross)
             for point in points:
                 if solid:
-                    print "Not implemented yet..."
+                    print("Not implemented yet...")
                     drawing.append(sdxf.Insert(cross.name, point=point, layer=layer))
                 else:
                     drawing.append(sdxf.Insert(cross.name, point=point, layer=layer))

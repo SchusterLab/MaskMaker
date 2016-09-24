@@ -196,7 +196,7 @@ def sapphire_capacitor_geometry_by_C(capacitance):
         num_fingers=8
         cap_table=caps_343_8F 
     if capacitance>28.0: 
-        raise MaskError, "Error do not have simulated capacitors bigger than 28 fF, must specify geometry manually"
+        raise MaskError("Error do not have simulated capacitors bigger than 28 fF, must specify geometry manually")
     
     get_length=interp1d (cap_table,finger_lengths)
     
@@ -230,7 +230,7 @@ def sapphire_capacitor_geometry_by_C_2(capacitance):
         num_fingers=8
         cap_table=caps_686_8F 
     else: 
-        raise MaskError, "Error do not have simulated capacitors bigger than 58.6 fF, must specify geometry manually"
+        raise MaskError("Error do not have simulated capacitors bigger than 58.6 fF, must specify geometry manually")
     
     get_length=interp1d (cap_table,finger_lengths)
     
@@ -271,7 +271,7 @@ def sapphire_ground_capacitor_geometry_by_C(capacitance,num_fingers=-1):
             num_fingers=6
             cap_table=caps_30_5F 
         if capacitance>415.0: 
-            raise MaskError, "Error do not have simulated capacitors bigger than 415 fF, must specify geometry manually"
+            raise MaskError("Error do not have simulated capacitors bigger than 415 fF, must specify geometry manually")
     else:
         if num_fingers==2:
             cap_table=caps_30_2F
@@ -284,7 +284,7 @@ def sapphire_ground_capacitor_geometry_by_C(capacitance,num_fingers=-1):
         elif num_fingers==6:
             cap_table=caps_30_6F
         else:
-            raise MaskError, "Invalid capacitor finger number specified"
+            raise MaskError("Invalid capacitor finger number specified")
         
     get_length=interp1d (cap_table,finger_lengths)
     
@@ -338,12 +338,12 @@ def sapphire_capacitor_by_C_Channels(capacitance):
         num_fingers=2
         cap_table=caps_2F
     if capacitance>3.0: 
-        raise MaskError, "Error do not have simulated capacitors bigger than 4 fF, must specify geometry manually"
+        raise MaskError("Error do not have simulated capacitors bigger than 4 fF, must specify geometry manually")
     
     get_length=interp1d (cap_table,finger_lengths)
     
     length=round(float(get_length(capacitance)))
-    print "Capacitance: %f, Fingers: %d, Finger Length: %f " % (capacitance, num_fingers,length)
+    print("Capacitance: %f, Fingers: %d, Finger Length: %f " % (capacitance, num_fingers, length))
     return CPWFingerCap(num_fingers=num_fingers,finger_length=length,finger_width=2,finger_gap=2,taper_length = 50,capacitance=1e-15*capacitance)
     #ChannelFingerCap(num_fingers=num_fingers,finger_length=length,finger_width=2,finger_gap=2,taper_length = 50,channelw=channelw,capacitance=1e-15*capacitance)
 
@@ -403,36 +403,45 @@ def shunt_by_length(length, inductance=None):
 if __name__=="__main__":
     phase_velocity=speedoflight/sqrt(5.7559)
     eps_eff=calculate_eps_eff(phase_velocity)
-    print eps_eff
+    print(eps_eff)
     eps_eff1=calculate_eps_eff_from_geometry(10.45,10,4.186,500)
     eps_eff2=calculate_eps_eff_from_geometry(10.45/1.057,10,4.186,500)
-    print "eps_eff1: %f, eps_eff2: %f, ratio: %f, shift: %f GHz" % (eps_eff1,eps_eff2,eps_eff1/eps_eff2,5*(1-sqrt(eps_eff1/eps_eff2)))
+    print("eps_eff1: %f, eps_eff2: %f, ratio: %f, shift: %f GHz" % (
+    eps_eff1, eps_eff2, eps_eff1 / eps_eff2, 5 * (1 - sqrt(eps_eff1 / eps_eff2))))
     
-    
-    #print "Estimated eps_eff from geometry is %f" % calculate_eps_eff_from_geometry(9.8,pinw=10,gapw=4.186,substrate_height=500)
-        
-    print calculate_impedance(10,4.186,5.7559)
+    # print("Estimated eps_eff from geometry is %f" % calculate_eps_eff_from_geometry(9.8, pinw=10, gapw=4.186,
+    #                                                                                 substrate_height=500))
+
+    print(calculate_impedance(10, 4.186, 5.7559))
     w=calculate_gap_width(eps_eff,50.,10.)
-    print "eps_eff: %f, pinw: %f, gapw: %f, Z: %f" % (eps_eff,10,w,calculate_impedance(10.,w,eps_eff))
+    print("eps_eff: %f, pinw: %f, gapw: %f, Z: %f" % (eps_eff, 10, w, calculate_impedance(10., w, eps_eff)))
     
     finger_cap=CPWFingerCap(4,100,2,2,capacitance=.5e-15)
-    print "Resonator with finger capacitance=%f fF, has Q=%f" % (finger_cap.capacitance*1e15,calculate_resonator_Q(7.,Ckin=finger_cap))
+    print("Resonator with finger capacitance=%f fF, has Q=%f" % (
+    finger_cap.capacitance * 1e15, calculate_resonator_Q(7., Ckin=finger_cap)))
     finger_cap=CPWFingerCap(4,100,2,2,capacitance=1e-15)
-    print "Resonator with finger capacitance=%f fF, has Q=%f" % (finger_cap.capacitance*1e15,calculate_resonator_Q(7.,Ckin=finger_cap))
+    print("Resonator with finger capacitance=%f fF, has Q=%f" % (
+    finger_cap.capacitance * 1e15, calculate_resonator_Q(7., Ckin=finger_cap)))
     finger_cap=CPWFingerCap(4,100,2,2,capacitance=2e-15)
-    print "Resonator with finger capacitance=%f fF, has Q=%f" % (finger_cap.capacitance*1e15,calculate_resonator_Q(7.,Ckin=finger_cap))
+    print("Resonator with finger capacitance=%f fF, has Q=%f" % (
+    finger_cap.capacitance * 1e15, calculate_resonator_Q(7., Ckin=finger_cap)))
     finger_cap=CPWFingerCap(4,100,2,2,capacitance=5e-15)
-    print "Resonator with finger capacitance=%f fF, has Q=%f" % (finger_cap.capacitance*1e15,calculate_resonator_Q(7.,Ckin=finger_cap))
+    print("Resonator with finger capacitance=%f fF, has Q=%f" % (
+    finger_cap.capacitance * 1e15, calculate_resonator_Q(7., Ckin=finger_cap)))
     finger_cap=CPWFingerCap(4,100,2,2,capacitance=10e-15)
-    print "Resonator with finger capacitance=%f fF, has Q=%f" % (finger_cap.capacitance*1e15,calculate_resonator_Q(7.,Ckin=finger_cap))
+    print("Resonator with finger capacitance=%f fF, has Q=%f" % (
+    finger_cap.capacitance * 1e15, calculate_resonator_Q(7., Ckin=finger_cap)))
     finger_cap=CPWFingerCap(4,100,2,2,capacitance=15.4e-15)
-    print "Resonator with finger capacitance=%f fF, has Q=%f" % (finger_cap.capacitance*1e15,calculate_resonator_Q(7.,Ckin=finger_cap))
+    print("Resonator with finger capacitance=%f fF, has Q=%f" % (
+    finger_cap.capacitance * 1e15, calculate_resonator_Q(7., Ckin=finger_cap)))
     finger_cap=CPWFingerCap(4,100,2,2,capacitance=30e-15)
-    print "Resonator with finger capacitance=%f fF, has Q=%f" % (finger_cap.capacitance*1e15,calculate_resonator_Q(7.,Ckin=finger_cap))
+    print("Resonator with finger capacitance=%f fF, has Q=%f" % (
+    finger_cap.capacitance * 1e15, calculate_resonator_Q(7., Ckin=finger_cap)))
     
     #Ckin_desc=CapDesc(capacitance=0.44e-15,num_fingers=0,finger_length=100.,finger_width=2,cap_gap=2,gapw=w)
     #Ckout_desc=CapDesc(capacitance=0.44e-15,num_fingers=0,finger_length=100.,finger_width=2,cap_gap=2,gapw=w)
     #coupler=CPWLCoupler(coupler_length=250,separation=30)
     cap=CPWGapCap(1)
-    print "Interior Length: %f mm" % (1e-3*calculate_interior_length(4.8,phase_velocity,50.,resonator_type=0.25,harmonic=0,Ckin=cap))
+    print("Interior Length: %f mm" % (
+    1e-3 * calculate_interior_length(4.8, phase_velocity, 50., resonator_type=0.25, harmonic=0, Ckin=cap)))
    # print "lambda/4 for 11.5 GHz: %f" % calculate_interior_length(11.5e9,phase_velocity,50.,resonator_type=0.25,harmonic=0,Ckin_desc=Ckin_desc,Ckout_desc=Ckout_desc)
