@@ -4431,7 +4431,7 @@ def arc_pts(start_angle, stop_angle, radius, segments=60.):
     segments = float(segments)
     pts = []
     for ii in range(int(segments)):
-        theta = (start_angle + ii / (segments - 1.) * (stop_angle - start_angle)) * pi / 180.
+        theta = (start_angle + ii / (segments) * (stop_angle - start_angle)) * pi / 180.
         p = (radius * cos(theta), radius * sin(theta))
         pts.append(p)
     return pts
