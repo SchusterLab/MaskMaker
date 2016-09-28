@@ -1,5 +1,5 @@
-from lib.MaskMaker.MaskMaker import *
-from lib.MaskMaker.ResonatorCalculations import *
+from .MaskMaker import *
+from .ResonatorCalculations import *
 
 
 #HangerCoupler

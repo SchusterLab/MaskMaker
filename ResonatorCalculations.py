@@ -5,7 +5,7 @@ from scipy.special import ellipk
 from scipy.optimize import brentq
 from scipy.interpolate import interp1d
 
-from lib.MaskMaker.MaskMaker import CPWGapCap,CPWFingerCap,CPWInductiveShunt,MaskError
+from .MaskMaker import CPWGapCap,CPWFingerCap,CPWInductiveShunt,MaskError
 
 
 mu0=1.25663706e-6

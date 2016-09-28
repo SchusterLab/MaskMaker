@@ -5,7 +5,7 @@ Created on Wed Aug 01 09:44:59 2012
 @author: slab
 """
 
-from slab.circuits import *
+from . import *
 
 class TestTwoLayer(Chip):
     def __init__(self):

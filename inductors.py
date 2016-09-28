@@ -2,7 +2,7 @@ from math import pi,sqrt
 
 from scipy.interpolate import interp1d
 
-from lib.MaskMaker.MaskMaker import CPWInductiveShunt
+from .MaskMaker import CPWInductiveShunt
 
 
 length_table = [12, 18, 26, 38, 50, 60, 75, 88, 100, 110]           #inductor length

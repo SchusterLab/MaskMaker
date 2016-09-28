@@ -4,7 +4,7 @@ import random
 
 from numpy import sqrt
 
-from lib.MaskMaker import sdxf as sdxf
+from . import sdxf
 from .alphanum import alphanum_dict
 
 

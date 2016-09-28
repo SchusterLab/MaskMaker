@@ -10,7 +10,7 @@ import logging
 from slab.circuits import calculate_gap_width, calculate_interior_length
 import numpy as np
 
-from lib.MaskMaker.MaskMaker.dsobj import *
+from .MaskMaker.dsobj import *
 
 
 logging.basicConfig(filename="dstest.log")
