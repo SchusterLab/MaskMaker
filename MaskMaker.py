@@ -555,6 +555,46 @@ class Launcher:
             pass
 
 
+def Inductive_Launcher(
+        structure,
+        pinw=25,
+        gapw=20,
+        padw=200,
+        padl=300,
+        num_loops=4):
+    s = structure
+
+    # todo: have the translation orientation specific.
+    horizontal_shift = num_loops * pinw + (num_loops + 1) * gapw
+    s.last = translate_pt(s.last, (- horizontal_shift, 0))
+
+    CPWStraight(s, padl, pinw=padw, gapw=gapw)
+    s.pinw = pinw
+    s.gapw = gapw
+    s.radius = pinw / 2. + gapw
+
+    # todo: have the translation orientation specific.
+    s.last = translate_pt(s.last, (0, padw / 2. - pinw / 2.))
+    for i in range(num_loops):
+        # CPWStraight(s, gapw, pinw, gapw)
+        CPWBend(s, 90, segments=5)
+        CPWStraight(s, padw - (pinw + gapw), pinw, gapw)
+        CPWBend(s, 90, segments=5)
+        CPWStraight(s, padl, pinw, gapw)
+        CPWBend(s, 90, segments=5)
+        CPWStraight(s, padw, pinw, gapw)
+        CPWBend(s, 90, segments=5)
+        CPWStraight(s, padl, pinw, gapw)
+
+        s.radius += pinw + gapw
+
+    CPWBend(s, 90, segments=5)
+
+    exit_radius = pinw / 2. + gapw
+    CPWStraight(s, padw / 2. - (pinw + gapw) - exit_radius * 1., pinw, gapw)
+    CPWBend(s, -90, radius=exit_radius, segments=5)
+
+
 # ===============================================================================
 #  CPW COMPONENTS    
 # ===============================================================================
@@ -1052,7 +1092,7 @@ class CoupledTaper:
                 center_gapw = structure.center_gapw
             except KeyError:
                 print("Missing center_gapw argument!")
-                #center_gapw = 1
+                # center_gapw = 1
         pinw, gapw, center_gapw = float(pinw), float(gapw), float(center_gapw)
 
         if stop_pinw == None: stop_pinw = pinw
@@ -1231,7 +1271,11 @@ class CPWBend:
 
         s = structure
 
-        if radius is None: radius = s.defaults['radius']
+        if radius is None:
+            try:
+                radius = s.__dict__['radius']
+            except KeyError:
+                radius = s.defaults['radius']
         if pinw is None:   pinw = s.__dict__['pinw']
         if gapw is None:   gapw = s.__dict__['gapw']
 
@@ -1326,7 +1370,6 @@ class CPWBend:
                    ]
         points3 = rotate_pts(points3, self.start_angle, self.start)
         points4 = rotate_pts(points3, self.stop_angle - self.start_angle, self.center)
-
 
         # make inner arcs
         self.structure.append(sdxf.Line(points1))
@@ -2003,8 +2046,6 @@ class CPWGapCap:
 
         gpoints = orient_pts(gpoints, s.last_direction, start)
 
-
-
         # create polylines and append to drawing
         s.append(sdxf.PolyLine(gpoints))
 
@@ -2043,7 +2084,6 @@ class CPWInductiveShunt:
             self.gapw = (num_segments + 1) * segment_gap + num_segments * segment_width
         else:
             self.gapw = segment_length
-
 
     @property
     def description(self):
@@ -2726,7 +2766,8 @@ class CapStar:
         number = self.number
 
         cap_width = cap.num_fingers * cap.finger_width + (cap.num_fingers - 1) * cap.finger_gap + 2 * cap.pinw * \
-                    s.__dict__['gapw'] / s.__dict__['pinw']
+                                                                                                  s.__dict__['gapw'] / \
+                                                                                                  s.__dict__['pinw']
         taper_length = cap.taper_length
         # phi is angle capacitor taper makes
         phi = atan((cap_width - pinw - 2 * gapw) / (2. * taper_length))
@@ -3558,7 +3599,6 @@ class CCDChannelTee(Structure):
             lstart_dir = start_dir + 90
             angle = start_dir
 
-
         # Bottom part of feed_line
         pts1 = [(-feed_length / 2., -spinw / 2.), (-feed_length / 2., -sgapw - spinw / 2.0),
                 (feed_length / 2., -sgapw - spinw / 2.0), (feed_length / 2., -spinw / 2.),
@@ -4217,7 +4257,6 @@ class ForkCoupler(Structure):
         else:
             lstart_dir = start_dir
             angle = start_dir - 90
-
 
         # fork vertical
         pts1 = [(-fork_width / 2., 0), (-fork_width / 2., finger_width), (fork_width / 2., finger_width),
