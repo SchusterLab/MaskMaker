@@ -4,8 +4,8 @@ import random
 
 from numpy import sqrt
 
-from . import sdxf
-from .alphanum import alphanum_dict
+import MaskMaker.sdxf as sdxf
+from MaskMaker.alphanum import alphanum_dict
 
 
 class MaskError:

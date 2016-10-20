@@ -7,7 +7,7 @@ Created on Mon Aug 06 11:30:46 2012
 from math import pi
 import logging
 
-from slab.circuits import calculate_gap_width, calculate_interior_length
+from .MaskMaker import calculate_gap_width, calculate_interior_length
 import numpy as np
 
 from .MaskMaker.dsobj import *
