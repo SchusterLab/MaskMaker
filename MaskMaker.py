@@ -2851,6 +2851,8 @@ class CapStar:
 # ===============================================================================
 
 
+
+
 class LShapeAlignmentMarks:
     def __init__(self, structure, width, armlength, layer='structure'):
         """creates an L shaped alignment marker of width and armlength for photolitho"""
@@ -2930,29 +2932,40 @@ class CrossShapeAlignmentMarks:
             s.append(sdxf.PolyLine(pts_real, layer=layer))
 
 
+class BoxShapeAlignmentMarks(CrossShapeAlignmentMarks):
+    def __init__(self, structure, width, armlength, solid=True, layer='structure'):
+        edge = armlength * 2
+        CrossShapeAlignmentMarks.__init__(self, structure, edge, armlength, solid, layer)
+
+
 class FineAlign:
-    def __init__(self, chip, buffer=60, al=60, wid=2):
+    def __init__(self, chip, buffer=60, al=60, wid=2, mark_type='cross'):
         '''Draws 4 + shaped alignment marks in the corners of the chip
         wid is width of the L's
         buffer is distance from center of L's to edge of chip
         length is lenght of outer side of the L's leg.
+        mark_type is one of ['cross', 'l', 'box']
         '''
+
         layer = 'gap'
+
         s1 = Structure(chip, start=(buffer, buffer), layer=layer, color=3, direction=0)
-        CrossShapeAlignmentMarks(s1, width=wid, armlength=al, layer=layer)
-        # LShapeAlignmentMarks(s1, width=wid, armlength=al, layer=layer)
-
         s2 = Structure(chip, start=(buffer, chip.size[1] - buffer), layer=layer, color=3, direction=270)
-        CrossShapeAlignmentMarks(s2, width=wid, armlength=al, layer=layer)
-        # LShapeAlignmentMarks(s2, width=wid, armlength=al, layer=layer)
-
         s3 = Structure(chip, start=(chip.size[0] - buffer, chip.size[1] - buffer), layer=layer, color=3, direction=180)
-        CrossShapeAlignmentMarks(s3, width=wid, armlength=al, layer=layer)
-        # LShapeAlignmentMarks(s3, width=wid, armlength=al, layer=layer)
-
         s4 = Structure(chip, start=(chip.size[0] - buffer, buffer), layer=layer, color=3, direction=90)
-        CrossShapeAlignmentMarks(s4, width=wid, armlength=al, layer=layer)
-        # LShapeAlignmentMarks(s4, width=wid, armlength=al, layer=layer)
+
+        alignmentMarkers = {
+            'cross': CrossShapeAlignmentMarks,
+            'l': LShapeAlignmentMarks,
+            'box': BoxShapeAlignmentMarks
+        }
+
+        marker = alignmentMarkers[mark_type]
+
+        marker(s1, wid, al, layer=layer)
+        marker(s2, wid, al, layer=layer)
+        marker(s3, wid, al, layer=layer)
+        marker(s4, wid, al, layer=layer)
 
 
 # ----------------------------------------------------------------------------
@@ -4349,6 +4362,31 @@ class AlphaNumText:
         for letter in text:
             AlphaNum(drawing, letter, size, point, direction, layer=layer)
             point = orient_pt((size[0], 0), direction, point)
+
+
+class AlignmentBox:
+    def __init__(self, drawing, linewidth, size, points, solid=False, layer='0', name='cross'):
+        w = size[0] / 2.
+        h = size[1] / 2.
+        pts = [(-w, -h), (-w, h), (w, h), (w, -h), (-w, -h)]
+
+        if layer != None:
+            cross = sdxf.Block(name=name.upper(), layer=layer)
+            cross.append(sdxf.PolyLine(pts))
+            drawing.layers.append(sdxf.Layer(name=layer, color=7))
+            drawing.blocks.append(cross)
+            for point in points:
+                if solid:
+                    print("Not implemented yet...")
+                    drawing.append(sdxf.Insert(cross.name, point=point, layer=layer))
+                else:
+                    drawing.append(sdxf.Insert(cross.name, point=point, layer=layer))
+        else:
+            for point in points:
+                if solid:
+                    drawing.append(sdxf.Solid(pts))
+                else:
+                    drawing.append(sdxf.Insert(sdxf.PolyLine(pts), point=point))
 
 
 class AlignmentCross:
