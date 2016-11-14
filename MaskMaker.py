@@ -497,7 +497,7 @@ class Structure(object):
 # ===============================================================================
 #  Primitives
 # ===============================================================================
-class Elipses:
+class Ellipses:
     def __init__(self, structure, center, major, minor, angle=0, segments=20):
         s = structure
         angle = 0
