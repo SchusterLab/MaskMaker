@@ -500,7 +500,6 @@ class Structure(object):
 class Ellipses:
     def __init__(self, structure, center, major, minor, angle=0, segments=20):
         s = structure
-        angle = 0
         elipses = [(cos(ang + angle / 360.) * major + center[0], sin(ang + angle / 360.) * minor + center[1]) for ang in
                    linspace(0, 2 * pi, segments + 1)]
         s.append(sdxf.PolyLine(elipses))
