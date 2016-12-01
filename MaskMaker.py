@@ -504,6 +504,11 @@ class Ellipses:
                    linspace(0, 2 * pi, segments + 1)]
         s.append(sdxf.PolyLine(elipses))
 
+# todo: need clean up, shouldn't be in primitives section.
+def ellipse_arcpts(center, major, minor, angle_start=0, angle_stop=2*pi, angle=0, segments=20):
+    ellipse = [(cos(ang + angle / 360.) * major + center[0], sin(ang + angle / 360.) * minor + center[1]) for
+               ang in linspace(angle_start, angle_stop, segments + 1)]
+    return ellipse
 
 # ===============================================================================
 #  CPW COMPONENTS    
