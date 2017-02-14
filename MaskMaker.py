@@ -213,10 +213,11 @@ class WaferMask(sdxf.Drawing):
             dashlayer = 'gap' if chip.two_layer else '0'
             DashedChipBorder(chip, self.dicing_border / 2., layer=dashlayer, solid=self.solid)
         if chip.two_layer:
-            self.layers.append(sdxf.Layer(name='gap', color=1))
-            self.layers.append(sdxf.Layer(name='pin', color=3))
-            self.blocks.append(chip.gap_layer)
-            self.blocks.append(chip.pin_layer)
+            for c, l in enumerate(['gap', 'pin', 'via']):
+                layer = sdxf.Layer(name=l, color = c + 1)
+                self.layers.append(layer)
+                self.blocks.append(chip.__dict__[l + '_layer'])
+
         if chip not in self.blocks:
             self.blocks.append(chip)
         slots_remaining = self.chip_points.__len__() - self.current_point
@@ -230,8 +231,8 @@ class WaferMask(sdxf.Drawing):
             self.current_point += 1
             self.append(sdxf.Insert(chip.name, point=p))
             if chip.two_layer:
-                self.append(sdxf.Insert(chip.name + 'gap', point=p, layer='gap'))
-                self.append(sdxf.Insert(chip.name + 'pin', point=p, layer='pin'))
+                for c, l in enumerate(['gap', 'pin', 'via']):
+                    self.append(sdxf.Insert(chip.name + l, point=p, layer=l))
             if label:
                 chip.label_chip(self, maskid=self.name, chipid=chip.name + ' ' + str(100 + ii + 1)[-2:],
                                 author=chip.author, offset=p)
