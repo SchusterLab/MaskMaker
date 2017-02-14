@@ -326,6 +326,8 @@ class Chip(sdxf.Block):
                                   textsize, layer='gap', solid=solid, segments=segments)
             self.pin_layer = Chip(name + "pin", size, mask_id_loc, chip_id_loc,
                                   textsize, layer='pin', solid=solid, segments=segments)
+            self.via_layer = Chip(name + "via", size, mask_id_loc, chip_id_loc,
+                                  textsize, layer='via', solid=solid, segments=segments)
             # self.rest_layer = Chip(name, size, mask_id_loc, chip_id_loc,
             #                       textsize, layer='rest', solid=solid)
             # self.append = self.rest_layer.append
@@ -404,16 +406,16 @@ class Chip(sdxf.Block):
         d = sdxf.Drawing()
 
         if self.two_layer:
-            d.layers.append(sdxf.Layer(name='gap', color=1))
-            d.layers.append(sdxf.Layer(name='pin', color=3))
             self.label_chip(self.gap_layer, maskid, chipid, self.author)
-            d.blocks.append(self.gap_layer)
-            d.append(sdxf.Insert(self.gap_layer.name, point=(0, 0), layer='gap'))
-            d.blocks.append(self.pin_layer)
-            d.append(sdxf.Insert(self.pin_layer.name, point=(0, 0), layer='pin'))
-            print(d.layers)
-            print(self.gap_layer.layer)
-            print(self.pin_layer.layer)
+            for color, l in enumerate(['gap', 'pin', 'via']):
+                # object is not subscritable. use __dict__ or __get_item__ instead.
+                layer = self.__dict__[l + '_layer']
+                d.layers.append(sdxf.Layer(name=l, color=color + 1))
+                d.blocks.append(layer)
+                d.append(sdxf.Insert(layer.name, point=(0, 0), layer=l))
+            # print(d.layers)
+            # print(self.gap_layer.layer)
+            # print(self.pin_layer.layer)
         else:
             if do_label:
                 self.label_chip(self, maskid, chipid, self.author)
@@ -447,6 +449,8 @@ class Structure(object):
                                        1, defaults)
             self.pin_layer = Structure(chip.pin_layer, start, direction, 'pin',
                                        2, defaults)
+            self.via_layer = Structure(chip.via_layer, start, direction, 'via',
+                                       3, defaults)
         self.chip = chip
         self.start = start
         self.last = start
