@@ -2863,7 +2863,7 @@ class CapStar:
 
 
 class LShapeAlignmentMarks:
-    def __init__(self, structure, width, armlength, layer='structure'):
+    def __init__(self, structure, width, armlength, layer='structure', solid=True):
         """creates an L shaped alignment marker of width and armlength for photolitho"""
         if width == 0: return
         if armlength == 0: return
@@ -2948,7 +2948,7 @@ class BoxShapeAlignmentMarks(CrossShapeAlignmentMarks):
 
 
 class FineAlign:
-    def __init__(self, chip, buffer=60, al=60, wid=2, mark_type='cross'):
+    def __init__(self, chip, buffer=60, al=60, wid=2, mark_type='cross', solid=True):
         '''Draws 4 + shaped alignment marks in the corners of the chip
         wid is width of the L's
         buffer is distance from center of L's to edge of chip
@@ -2971,10 +2971,10 @@ class FineAlign:
 
         marker = alignmentMarkers[mark_type]
 
-        marker(s1, wid, al, layer=layer)
-        marker(s2, wid, al, layer=layer)
-        marker(s3, wid, al, layer=layer)
-        marker(s4, wid, al, layer=layer)
+        marker(s1, wid, al, layer=layer, solid=solid)
+        marker(s2, wid, al, layer=layer, solid=solid)
+        marker(s3, wid, al, layer=layer, solid=solid)
+        marker(s4, wid, al, layer=layer, solid=solid)
 
 
 # ----------------------------------------------------------------------------
