@@ -615,10 +615,11 @@ class Box:
         Ge
         """
 
-    def __init__(self, structure, length, width, offset=None):
+    def __init__(self, structure, length, width, offset=None, solid=False):
         if length == 0 or width == 0: return
         s = structure;
         self.s = s
+        self.solid = solid
         if offset == None:
             start = structure.last;
         else:
@@ -634,7 +635,10 @@ class Box:
     def rotNadd(self, s, items):
         for item in items:
             item = rotate_pts(item, s.last_direction, self.start)
-            s.append(sdxf.PolyLine(item))
+            if self.solid:
+                s.append(sdxf.Solid(item[:-1], layer=s.layer))
+            else:
+                s.append(sdxf.PolyLine(item, layer=s.layer))
 
     def align(self, align_spacing, align_size):
         l, w = align_spacing
@@ -2943,8 +2947,9 @@ class CrossShapeAlignmentMarks:
 
 class BoxShapeAlignmentMarks(CrossShapeAlignmentMarks):
     def __init__(self, structure, width, armlength, solid=True, layer='structure'):
-        edge = armlength * 2
-        CrossShapeAlignmentMarks.__init__(self, structure, edge, armlength, solid, layer)
+        #edge = armlength * 2
+        #CrossShapeAlignmentMarks.__init__(self, structure, edge, armlength, solid, layer)
+        Box(structure, armlength, width, offset=None, solid=solid)
 
 
 class FineAlign:
