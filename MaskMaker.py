@@ -48,6 +48,12 @@ def rotate_pts(points, angle, center=(0, 0)):
     return [rotate_pt(p, angle, center) for p in points]
 
 
+def translate_pt_by_r(p, r, deg):
+    """Translate point p=(x,y) by r in direction"""
+    theta = pi * deg / 180
+    return (p[0] + cos(theta) * r, p[1] + sin(theta) * r)
+
+
 def translate_pt(p, offset):
     """Translates point p=(x,y) by offset=(x,y)"""
     return (p[0] + offset[0], p[1] + offset[1])
@@ -214,7 +220,7 @@ class WaferMask(sdxf.Drawing):
             DashedChipBorder(chip, self.dicing_border / 2., layer=dashlayer, solid=self.solid)
         if chip.two_layer:
             for c, l in enumerate(['gap', 'pin', 'via']):
-                layer = sdxf.Layer(name=l, color = c + 1)
+                layer = sdxf.Layer(name=l, color=c + 1)
                 self.layers.append(layer)
                 self.blocks.append(chip.__dict__[l + '_layer'])
 
@@ -414,9 +420,9 @@ class Chip(sdxf.Block):
                 d.layers.append(sdxf.Layer(name=l, color=color + 1))
                 d.blocks.append(layer)
                 d.append(sdxf.Insert(layer.name, point=(0, 0), layer=l))
-            # print(d.layers)
-            # print(self.gap_layer.layer)
-            # print(self.pin_layer.layer)
+                # print(d.layers)
+                # print(self.gap_layer.layer)
+                # print(self.pin_layer.layer)
         else:
             if do_label:
                 self.label_chip(self, maskid, chipid, self.author)
@@ -509,11 +515,13 @@ class Ellipses:
                    linspace(0, 2 * pi, segments + 1)]
         s.append(sdxf.PolyLine(elipses))
 
+
 # todo: need clean up, shouldn't be in primitives section.
-def ellipse_arcpts(center, major, minor, angle_start=0, angle_stop=2*pi, angle=0, segments=20):
+def ellipse_arcpts(center, major, minor, angle_start=0, angle_stop=2 * pi, angle=0, segments=20):
     ellipse = [(cos(ang + angle / 360.) * major + center[0], sin(ang + angle / 360.) * minor + center[1]) for
                ang in linspace(angle_start, angle_stop, segments + 1)]
     return ellipse
+
 
 # ===============================================================================
 #  CPW COMPONENTS    
@@ -570,38 +578,41 @@ def Inductive_Launcher(
         gapw=20,
         padw=200,
         padl=300,
-        num_loops=4):
+        num_loops=4,
+        handedness='right',
+        launch=True):
     s = structure
+    bend_angle = 90 if handedness is 'right' else - 90
 
-    # todo: have the translation orientation specific.
-    horizontal_shift = num_loops * pinw + (num_loops + 1) * gapw
-    s.last = translate_pt(s.last, (- horizontal_shift, 0))
+    shift = num_loops * pinw + (num_loops + 1) * gapw
+    s.last = translate_pt_by_r(s.last, shift, s.last_direction)
 
     CPWStraight(s, padl, pinw=padw, gapw=gapw)
     s.pinw = pinw
     s.gapw = gapw
     s.radius = pinw / 2. + gapw
 
-    # todo: have the translation orientation specific.
-    s.last = translate_pt(s.last, (0, padw / 2. - pinw / 2.))
+    s.last = translate_pt_by_r(s.last, padw / 2. - pinw / 2., s.last_direction - bend_angle)
     for i in range(num_loops):
         # CPWStraight(s, gapw, pinw, gapw)
-        CPWBend(s, 90, segments=5)
+        CPWBend(s, bend_angle, segments=5)
         CPWStraight(s, padw - (pinw + gapw), pinw, gapw)
-        CPWBend(s, 90, segments=5)
+        CPWBend(s, bend_angle, segments=5)
         CPWStraight(s, padl, pinw, gapw)
-        CPWBend(s, 90, segments=5)
+        CPWBend(s, bend_angle, segments=5)
         CPWStraight(s, padw, pinw, gapw)
-        CPWBend(s, 90, segments=5)
+        CPWBend(s, bend_angle, segments=5)
         CPWStraight(s, padl, pinw, gapw)
 
         s.radius += pinw + gapw
 
-    CPWBend(s, 90, segments=5)
+    if not launch: return;
+
+    CPWBend(s, bend_angle, segments=5)
 
     exit_radius = pinw / 2. + gapw
     CPWStraight(s, padw / 2. - (pinw + gapw) - exit_radius * 1., pinw, gapw)
-    CPWBend(s, -90, radius=exit_radius, segments=5)
+    CPWBend(s, -bend_angle, radius=exit_radius, segments=5)
 
 
 # ===============================================================================
@@ -2191,6 +2202,32 @@ class CPWInductiveShunt:
             return 0.0
 
 
+class CPWCapacitiveShunt:
+    def __init__(self, s, number_of_fingers, finger_length, pinw=None, gapw=None, finger_pinw=None, finger_gapw=None):
+        # draw the capacitor
+        start = s.last
+        last_direction = s.last_direction
+        half_channel_w = finger_pinw / 2 + finger_gapw
+        # CPWStraight(s, half_channel_w, pinw=pinw, gapw=gapw)
+        for i in range(number_of_fingers):
+            CPWStraight(s, finger_pinw / 2, pinw=pinw, gapw=gapw)
+            CPWStraight(s, finger_pinw / 2 + finger_gapw, pinw=pinw, gapw=0)
+            here = s.last
+            s.last_direction -= 90
+            CPWStraight(s, (pinw or s.pinw) / 2, pinw=0, gapw=0)
+            CPWStraight(s, finger_length, pinw=finger_pinw, gapw=finger_gapw)
+            CPWStraight(s, finger_gapw, pinw=0, gapw=half_channel_w)
+            s.last = here
+            s.last_direction += 180
+            CPWStraight(s, (pinw or s.pinw) / 2, pinw=0, gapw=0)
+            CPWStraight(s, finger_length, pinw=finger_pinw, gapw=finger_gapw)
+            CPWStraight(s, finger_gapw, pinw=0, gapw=half_channel_w)
+            s.last = here
+            s.last_direction -= 90
+            CPWStraight(s, finger_pinw / 2 + finger_gapw, pinw=pinw, gapw=0)
+            CPWStraight(s, finger_pinw / 2, pinw=pinw, gapw=gapw)
+
+
 def rectangle_points(size, orientation=0, center=(0, 0)):
     return orient_pts([(-size[0] / 2., -size[1] / 2.), (size[0] / 2., -size[1] / 2.), (size[0] / 2., size[1] / 2.),
                        (-size[0] / 2., size[1] / 2.), (-size[0] / 2., -size[1] / 2.)], orientation, center)
@@ -2947,8 +2984,8 @@ class CrossShapeAlignmentMarks:
 
 class BoxShapeAlignmentMarks(CrossShapeAlignmentMarks):
     def __init__(self, structure, width, armlength, solid=True, layer='structure'):
-        #edge = armlength * 2
-        #CrossShapeAlignmentMarks.__init__(self, structure, edge, armlength, solid, layer)
+        # edge = armlength * 2
+        # CrossShapeAlignmentMarks.__init__(self, structure, edge, armlength, solid, layer)
         Box(structure, armlength, width, offset=None, solid=solid)
 
 
