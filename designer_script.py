@@ -4,15 +4,11 @@ Created on Mon Aug 06 11:30:46 2012
 
 @author: phil
 """
+from slab.circuits import orient_pts, calculate_gap_width, calculate_interior_length
 from math import pi
-import logging
-
-from .MaskMaker import calculate_gap_width, calculate_interior_length
+from .dsobj import *
 import numpy as np
-
-from .MaskMaker.dsobj import *
-
-
+import logging
 logging.basicConfig(filename="dstest.log")
 
 class DesignerScript(object):
@@ -129,7 +125,7 @@ Set oEditor = oDesign.SetActiveEditor("Layout")
         self.write("\n")
         
     def add_properties(self, prop_dict):
-        for key, value in prop_dict.items():
+        for key, value in list(prop_dict.items()):
             self.add_property(key, value)
     
     def set_module(self, module):
@@ -163,7 +159,7 @@ Set oEditor = oDesign.SetActiveEditor("Layout")
         self.write('oDesign.Analyze "%(setup)s : %(sweep)s' % (locals()))
     
     def add_lincount(self, start, stop, count, setup=None):
-        self.add_sweep(" ".join(["LINC"]+map(str,[start, stop, count])), "true", setup)
+        self.add_sweep(" ".join(["LINC"]+list(map(str,[start, stop, count]))), "true", setup)
     
     def add_point_calc(self, point, setup=None):
         self.add_sweep(str(point), "false", setup)
@@ -327,7 +323,7 @@ Set oEditor = oDesign.SetActiveEditor("Layout")
         gapw = gapw if gapw else structure.gapw
 
         start, angle = structure.start, structure.angle
-        length, pinw, gapw = map(DSObjLen, [length, pinw, gapw])
+        length, pinw, gapw = list(map(DSObjLen, [length, pinw, gapw]))
         delta = (pinw+gapw)/2
         names = []
         for sign in [-1, +1]:
@@ -345,7 +341,7 @@ Set oEditor = oDesign.SetActiveEditor("Layout")
         gapw = gapw if gapw else s.gapw
         finger_width = finger_width if finger_width else gapw
         finger_len, finger_width, pinw, gapw = \
-          map(DSObjLen, [finger_len, finger_width, pinw, gapw])
+          list(map(DSObjLen, [finger_len, finger_width, pinw, gapw]))
         for i in range(n_fingers):
             self.CPWStraight(s, gapw, gapw=gapw+finger_len)
             self.CPWStraight(s, finger_width, pinw=pinw+(2*finger_len))
@@ -360,7 +356,7 @@ Set oEditor = oDesign.SetActiveEditor("Layout")
         gapw = gapw if gapw else structure.gapw
         start, start_angle = structure.start, structure.angle
         bend_angle = DSObj(bend_angle, "deg")
-        radius, pinw, gapw = map(DSObjLen, [radius, pinw, gapw])
+        radius, pinw, gapw = list(map(DSObjLen, [radius, pinw, gapw]))
         
         delta = (pinw+gapw)/2
         osign = {'CW':-1, 'CCW':1}[orientation]
@@ -385,7 +381,7 @@ Set oEditor = oDesign.SetActiveEditor("Layout")
     def CPWTaper(self, structure, length, start_pinw, start_gapw, end_pinw, end_gapw):
         start, start_angle = structure.start, structure.angle
         length, start_pinw, start_gapw, end_pinw, end_gapw =\
-          map(DSObjLen, [length, start_pinw, start_gapw, end_pinw, end_gapw])
+          list(map(DSObjLen, [length, start_pinw, start_gapw, end_pinw, end_gapw]))
         names = []
         for sign in [-1, 1]:
             h0 = sign * (start_pinw/2)
@@ -402,7 +398,7 @@ Set oEditor = oDesign.SetActiveEditor("Layout")
         pinw = pinw if pinw else structure.pinw
         gapw = gapw if gapw else structure.gapw
         total_length, radius, pinw, gapw = \
-          map(DSObjLen, [total_length, radius, pinw, gapw])
+          list(map(DSObjLen, [total_length, radius, pinw, gapw]))
         s = structure
         vlength=(total_length-((1+num_wiggles)*(pi*radius)+2*(num_wiggles-1)*radius))/(2*num_wiggles)
         
@@ -418,9 +414,9 @@ Set oEditor = oDesign.SetActiveEditor("Layout")
         self.CPWBend(s, 90, radius, final_bend_orientation)
         
     def CPWFingerCap(self, structure, num_fingers, finger_length, finger_width, finger_gap, taper_length="50um"):
-        pinw, gapw = map(DSObjLen, [structure.pinw, structure.gapw])
+        pinw, gapw = list(map(DSObjLen, [structure.pinw, structure.gapw]))
         finger_length, finger_width, finger_gap, taper_length =\
-          map(DSObjLen, [finger_length, finger_width, finger_gap, taper_length])
+          list(map(DSObjLen, [finger_length, finger_width, finger_gap, taper_length]))
         center_width = num_fingers*finger_width + (num_fingers-1)*finger_gap
         center_gap = center_width * (gapw / pinw)
         length = finger_length + finger_gap
@@ -565,7 +561,7 @@ Set oEditor = oDesign.SetActiveEditor("Layout")
         gapw = gapw if gapw else s.gapw
         pinw = pinw if pinw else s.pinw
         
-        taper_len, int_len, pinw, gapw = map(DSObjLen, [taper_len, int_len, pinw, gapw])
+        taper_len, int_len, pinw, gapw = list(map(DSObjLen, [taper_len, int_len, pinw, gapw]))
         finger_gapw = c_gap
         center_gapw = fingerw = 3 * c_gap
         center_pinw_left = 2 * inner_finger_len_left + pinw
@@ -772,4 +768,4 @@ if __name__ == "__main__":
     #d.run_optimization()
         
     d.save()
-    print "Done!"
+    print("Done!")

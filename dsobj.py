@@ -23,7 +23,7 @@ class DSObj(object):
                 res = unit_re.match(value)
                 if res:
                     sval, unit = res.groups()
-                    print "value match", sval, "unit match", unit
+                    print("value match", sval, "unit match", unit)
                     value = float(sval)
                     self.type = 'literal'
                 else:
@@ -46,7 +46,7 @@ class DSObj(object):
         self.script.add_property(name, str(self))
         self.val = name
         self.type = 'property'
-        print self, self.unit
+        print(self, self.unit)
         if not self.unit: assert False
     def __repr__(self):
         if self.type is 'property':
@@ -66,7 +66,7 @@ class DSObj(object):
         if other.val == 0:
             return self        
         if not self.unit == other.unit:
-            print self.unit, other.unit, self, other
+            print(self.unit, other.unit, self, other)
             assert False
         unit = self.unit
         if self.type is "literal" and other.type is "literal":

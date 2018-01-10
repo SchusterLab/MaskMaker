@@ -1,9 +1,6 @@
-from math import pi,sqrt
-
 from scipy.interpolate import interp1d
-
+from math import pi,sqrt
 from .MaskMaker import CPWInductiveShunt
-
 
 length_table = [12, 18, 26, 38, 50, 60, 75, 88, 100, 110]           #inductor length
 L_table = [1.87, 2.75, 3.98, 5.49, 7.63, 8.58, 11.2, 12.7, 15.4, 16.0]  #inductance (pH)

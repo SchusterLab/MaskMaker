@@ -33,7 +33,7 @@ def autoargs(*include,**kwargs):
                 if sieve(varargs): setattr(self, varargs, remaining_args)                
             # handle varkw
             if kwargs:
-                for attr,val in kwargs.iteritems():
+                for attr,val in kwargs.items():
                     if sieve(attr): setattr(self,attr,val)            
             return func(self,*args,**kwargs)
         return wrapper
@@ -98,8 +98,7 @@ class Test(unittest.TestCase):
         self.assertRaises(AttributeError,getattr,a,'bar')
 """
 
-from .MaskMaker import *
-from .ResonatorCalculations import *
+from slab.circuits import *
 class ChipDefaults(dict):
     """ changed defaults to a class, and added all the values as attributes."""
     @autoargs()
